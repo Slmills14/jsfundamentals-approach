@@ -20,9 +20,10 @@ setTimeout(() => console.log(test()), 13000) // 'Have some cake' (13 seconds ela
 setTimeout(() => console.log(test()), 19000) // 'Have some cake' (20 seconds elapsed, 6 seconds after lastCall, lastCall now set to 19 seconds)
 
 const throttled = (func, delay) => {
-  //on the first call, you are allowed to call the function (canCall is true), and a request is made, so request is true
+  //on the first call, you are allowed to call the function (canCall is true)
+  //for request, I was playing around with whether it should be true or false to start. 
   let canCall = true
-  let request = true;
+  let request = false;
 
   return function helperFunc() {
     request = true;
@@ -68,3 +69,44 @@ console.log(fingersCrossed())
 setTimeout(() => {
   console.log(fingersCrossed())
 }, 9000)
+
+
+
+
+
+//here is another example - I didnt write this one - I dont love the gun references. 
+const throttle2 = (f, t) => {
+  // "ready" refers to whether the gun is overheated or not. A ready gun is not
+  // overheated, and can shoot immediately.
+  let ready = true;
+  // "loaded" refers to whether the gun has a bullet in it
+  let loaded = false;
+
+  // function that represents shooting the gun
+  const shoot = () => {
+    ready = false; // gun overheats upon shot
+    loaded = false; // gun has no bullet in it after being shot
+
+    // ensure that after cooling down, the gun should shoot if it's loaded
+    setTimeout(() => {
+      if (loaded)
+        shoot();
+      else
+        ready = true;
+    }, t);
+
+    // gun fires!
+    f();
+  };
+
+  // This is our main function. If the gun is ready (non-overheated) shoot it.
+  // Otherwise, just load the gun with a bullet (if it is not loaded already).
+  return () => {
+    if (ready) {
+      shoot();
+      return true;
+    }
+    else
+      loaded = true;
+  };
+};
